@@ -9,8 +9,8 @@ p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
 p.setGravity(0, 0, -19.6)
 planeId = p.loadURDF("plane.urdf")
-robotId = p.loadURDF("body.urdf")
-p.loadSDF("world.sdf")
+robotId = p.loadURDF("generated/body.urdf")
+p.loadSDF("generated/world.sdf")
 
 pyrosim.Prepare_To_Simulate(robotId)
 steps = 200

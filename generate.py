@@ -5,14 +5,14 @@ x, y, z = 0, 0, (3 * height)/2
 
 
 def Create_World():
-    pyrosim.Start_SDF("world.sdf")
+    pyrosim.Start_SDF("generated/world.sdf")
     pyrosim.Send_Cube(name=f'Box', pos=[
                       x + (2 * length), y + width, z], size=[length, width, height])
     pyrosim.End()
 
 
 def Create_Robot():
-    pyrosim.Start_URDF("body.urdf")
+    pyrosim.Start_URDF("generated/body.urdf")
     pyrosim.Send_Cube(name=f'Torso', pos=[x, y, z], size=[
                       length, width, height])
 
