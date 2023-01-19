@@ -11,12 +11,10 @@ import time
 class SIMULATION:
     def __init__(self):
         self.physicsClient = p.connect(p.GUI)
-        self.world = WORLD()
-        self.robot = ROBOT()
-        p.loadSDF("generated/world.sdf")
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.setGravity(0, 0, -19.6)
-        self.planeId = p.loadURDF("plane.urdf")
+        self.world = WORLD()
+        self.robot = ROBOT()
 
     def __del__(self):
         p.disconnect()
