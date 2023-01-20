@@ -32,4 +32,5 @@ class ROBOT:
             self.motors[jointName].Set_Value(t, self)
 
     def Think(self):
+        self.nn.Update()
         self.nn.Print()
