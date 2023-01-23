@@ -35,8 +35,6 @@ class ROBOT:
                 self.motors[jointName].Set_Value(desiredAngle, self)
                 print(
                     f'Neuron: {neuronName}, Joint: {jointName}, Desired Angle: {desiredAngle}')
-        # for jointName in self.motors:
-        #     self.motors[jointName].Set_Value(t, self)
 
     def Think(self):
         self.nn.Update()
