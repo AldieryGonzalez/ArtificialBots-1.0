@@ -18,12 +18,12 @@ class MOTOR:
         self.motorValues = numpy.sin((piArr * self.frequency) +
                                      self.offset) * self.amplitude
 
-    def Set_Value(self, t, robot):
+    def Set_Value(self, desiredAngle, robot):
         pyrosim.Set_Motor_For_Joint(
             bodyIndex=robot.robotId,
             jointName=self.jointName,
             controlMode=p.POSITION_CONTROL,
-            targetPosition=self.motorValues[t],
+            targetPosition=desiredAngle,
             maxForce=500)
 
     def Save_Values(self):
