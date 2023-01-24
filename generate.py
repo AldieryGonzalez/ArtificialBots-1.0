@@ -1,4 +1,5 @@
 import pyrosim.pyrosim as pyrosim
+import random
 
 length, width, height = 1, 1, 1
 x, y, z = 0, 0, (3 * height)/2
@@ -43,11 +44,11 @@ def Generate_Brain():
     pyrosim.Send_Motor_Neuron(name=3, jointName="Torso_BackLeg")
     pyrosim.Send_Motor_Neuron(name=4, jointName="Torso_FrontLeg")
 
-    pyrosim.Send_Synapse(sourceNeuronName=2, targetNeuronName=3, weight=0.4)
-    pyrosim.Send_Synapse(sourceNeuronName=1, targetNeuronName=4, weight=-0.7)
-    # pyrosim.Send_Synapse(sourceNeuronName=1, targetNeuronName=4, weight=0.7)
-    # pyrosim.Send_Synapse(sourceNeuronName=0, targetNeuronName=3, weight=0.4)
-    # pyrosim.Send_Synapse(sourceNeuronName=1, targetNeuronName=4, weight=0.7)
+    for sensorName in range(3):
+        for motorName in range(3, 5):
+            w = (random.random() * 2) - 1
+            pyrosim.Send_Synapse(sourceNeuronName=sensorName,
+                                 targetNeuronName=motorName, weight=w)
 
     pyrosim.End()
 
