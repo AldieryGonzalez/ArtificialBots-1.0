@@ -1,4 +1,5 @@
 import pybullet as p
+import numpy
 import pyrosim.pyrosim as pyrosim
 from motor import MOTOR
 from sensor import SENSOR
@@ -12,6 +13,14 @@ class ROBOT:
         self.Prepare_To_Sense()
         self.Prepare_To_Act()
         self.nn = NEURAL_NETWORK("generated/brain.nndf")
+
+    def Get_Fitness(self):
+        stateOfLinkZero = p.getLinkState(self.robotId, 0)
+        positionOfLinkZero = stateOfLinkZero[0]
+        xCoordinateOfLinkZero = positionOfLinkZero[0]
+        f = open("data/fitness.txt", "w")
+        f.write(str(xCoordinateOfLinkZero))
+        f.close()
 
     def Prepare_To_Sense(self):
         self.sensors = {}

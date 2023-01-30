@@ -1,6 +1,7 @@
 import numpy
 import pyrosim.pyrosim as pyrosim
 import os
+import random
 
 
 length, width, height = 1, 1, 1
@@ -18,6 +19,16 @@ class SOLUTION:
         self.Generate_Body()
         self.Generate_Brain()
         os.system("python simulate.py")
+        f = open("data/fitness.txt", "r")
+        value = float(f.read())
+        self.fitness = value
+        f.close()
+
+    def Mutate(self):
+        randRow = random.randint(0, 2)
+        randCol = random.randint(0, 1)
+        randValue = random.random() * 2 - 1
+        self.weights[randRow, randCol] = randValue
 
     def Create_World(self):
         pyrosim.Start_SDF("generated/world.sdf")
