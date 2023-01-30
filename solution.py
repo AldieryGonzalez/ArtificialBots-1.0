@@ -14,11 +14,11 @@ class SOLUTION:
                                      [numpy.random.rand(), numpy.random.rand()],
                                      [numpy.random.rand(), numpy.random.rand()]]) * 2 - 1
 
-    def Evaluate(self):
+    def Evaluate(self, directOrGui):
         self.Create_World()
         self.Generate_Body()
         self.Generate_Brain()
-        os.system("python simulate.py")
+        os.system(f"python simulate.py {directOrGui}")
         f = open("data/fitness.txt", "r")
         value = float(f.read())
         self.fitness = value
