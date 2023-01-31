@@ -17,18 +17,25 @@ class SOLUTION:
                                      [numpy.random.rand(), numpy.random.rand()]]) * 2 - 1
 
     def Evaluate(self, directOrGui):
+        pass
+
+    def Start_Simulation(self, directOrGui):
         self.Create_World()
         self.Generate_Body()
         self.Generate_Brain()
         os.system("start /B python3 simulate.py " +
                   directOrGui + " " + str(self.myID))
-        while not os.path.exists(f"data/fitness{str(self.myID)}.txt"):
+
+    def Wait_For_Simulation_To_End(self):
+        while not os.path.exists(f"fitness{str(self.myID)}.txt"):
             time.sleep(0.01)
-        f = open(f"data/fitness{str(self.myID)}.txt", "r")
+        f = open(f"fitness{str(self.myID)}.txt", "r")
         value = float(f.read())
         self.fitness = value
         print(self.fitness)
         f.close()
+        os.system(f"del fitness{self.myID}.txt")
+        print(value)
 
     def Mutate(self):
         randRow = random.randint(0, 2)

@@ -21,11 +21,11 @@ class ROBOT:
         stateOfLinkZero = p.getLinkState(self.robotId, 0)
         positionOfLinkZero = stateOfLinkZero[0]
         xCoordinateOfLinkZero = positionOfLinkZero[0]
-        f = open(f"data/tmp{self.id}.txt", "w")
+        f = open(f"tmp{self.id}.txt", "w")
         f.write(str(xCoordinateOfLinkZero))
         f.close()
-        os.rename(f"data/tmp{self.id}.txt",
-                  f"data/fitness{self.id}.txt")
+        os.rename(f"tmp{self.id}.txt",
+                  f"fitness{self.id}.txt")
 
     def Prepare_To_Sense(self):
         self.sensors = {}
