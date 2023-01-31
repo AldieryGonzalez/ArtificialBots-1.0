@@ -20,7 +20,7 @@ class SOLUTION:
         self.Create_World()
         self.Generate_Body()
         self.Generate_Brain()
-        os.system("start /B python simulate.py " +
+        os.system("start /B python3 simulate.py " +
                   directOrGui + " " + str(self.myID))
         while not os.path.exists(f"data/fitness{str(self.myID)}.txt"):
             time.sleep(0.01)
