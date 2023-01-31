@@ -23,7 +23,7 @@ class SOLUTION:
         self.Create_World()
         self.Generate_Body()
         self.Generate_Brain()
-        os.system("start /B python3 simulate.py " +
+        os.system("start /B python simulate.py " +
                   directOrGui + " " + str(self.myID))
 
     def Wait_For_Simulation_To_End(self):
@@ -32,10 +32,9 @@ class SOLUTION:
         f = open(f"fitness{str(self.myID)}.txt", "r")
         value = float(f.read())
         self.fitness = value
-        print(self.fitness)
+        # print(f"\n\nRobot Number {self.myID}: {self.fitness}\n")
         f.close()
         os.system(f"del fitness{self.myID}.txt")
-        print(value)
 
     def Mutate(self):
         randRow = random.randint(0, 2)
