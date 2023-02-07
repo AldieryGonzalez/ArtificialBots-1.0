@@ -1,5 +1,7 @@
 from solution import SOLUTION
+import matplotlib.pyplot as pyplot
 import constants as c
+import numpy as np
 import copy
 import os
 
@@ -8,8 +10,10 @@ class PARALLEL_HILL_CLIMBER:
     def __init__(self):
         os.system("del brain*.nndf")
         os.system("del fitness*.txt")
+        os.system("del graph*.nndf")
         self.nextAvailableID = 0
         self.parents = {}
+
         for i in range(c.populationSize):
             self.parents[i] = SOLUTION(self.nextAvailableID)
             self.nextAvailableID += 1
@@ -49,18 +53,32 @@ class PARALLEL_HILL_CLIMBER:
         print("\n")
         for key in self.parents:
             print(
-                f"Parent: {self.parents[key].fitness}, Child: {self.children[key].fitness} ")
+                f"Parent: {self.parents[key].fitness}, Child: {self.children[key].fitness}, Parent History: {self.parents[key].history}")
         print("\n")
 
     def Select(self):
         for key in self.parents:
             if (self.parents[key].fitness > self.children[key].fitness):
                 self.parents[key] = self.children[key]
+            self.parents[key].history.append(self.parents[key].fitness)
 
     def Show_Best(self):
         mostFit = self.parents[0]
         for key in self.parents:
+            np.save(f'graph{key}.npy', self.parents[key].history)
             if (mostFit.fitness > self.parents[key].fitness):
                 mostFit = self.parents[key]
-        print(f"\n\nMOST FIT: {mostFit}\nFITNESS: {mostFit.fitness}\n")
+        print(
+            f"\n\nMOST FIT: {mostFit}\nFITNESS: {mostFit.fitness}, {mostFit.history}\n")
         mostFit.Start_Simulation("GUI")
+        self.analyze(mostFit)
+
+    def analyze(self, fittest):
+        pyplot.plot(fittest.history, label="Fittest", linewidth=4, marker='o')
+        for key in self.parents:
+            fittestData = np.load(f"graph{key}.npy")
+            pyplot.plot(fittestData, marker='o')
+        pyplot.legend()
+        pyplot.xlabel("Generation")
+        pyplot.ylabel("Distance from goal (fitness)")
+        pyplot.show()

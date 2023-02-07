@@ -9,8 +9,8 @@ import constants as c
 length, width, height = 1, 1, 1
 x, y, z = 0, 0, 1
 
-goalSize = (8, 0.5, 2)
-goalPos = (0, 12, 1)
+goalSize = c.goalSize
+goalPos = c.goalPos
 crossWidth = 1
 sideCrossSize = [crossWidth, crossWidth, goalSize[2]]
 crossSize = [goalSize[0]+2*crossWidth, crossWidth, crossWidth]
@@ -23,6 +23,7 @@ crossPos = [goalPos[0], goalPos[1]-crossWidth, goalSize[2]+crossWidth/2]
 class SOLUTION:
     def __init__(self, myID):
         self.myID = myID
+        self.history = []
         self.weights = numpy.matrix([[numpy.random.rand() for i in range(
             c.numMotorNeurons)] for j in range(c.numSensorNeurons)]) * 2 - 1
 
@@ -45,6 +46,8 @@ class SOLUTION:
         # print(f"\n\nRobot Number {self.myID}: {self.fitness}\n")
         f.close()
         os.system(f"del fitness{self.myID}.txt")
+        if (len(self.history) == 0):
+            self.history.append(self.fitness)
 
     def Mutate(self):
         randRow = random.randint(0, c.numSensorNeurons-1)
