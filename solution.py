@@ -9,6 +9,16 @@ import constants as c
 length, width, height = 1, 1, 1
 x, y, z = 0, 0, 1
 
+goalSize = (8, 0.5, 2)
+goalPos = (0, 12, 1)
+crossWidth = 1
+sideCrossSize = [crossWidth, crossWidth, goalSize[2]]
+crossSize = [goalSize[0]+2*crossWidth, crossWidth, crossWidth]
+leftCrossPos = [goalPos[0]-goalSize[0]/2, goalPos[1]-crossWidth, goalSize[2]/2]
+rightCrossPos = [goalPos[0]+goalSize[0]/2,
+                 goalPos[1]-crossWidth, goalSize[2]/2]
+crossPos = [goalPos[0], goalPos[1]-crossWidth, goalSize[2]+crossWidth/2]
+
 
 class SOLUTION:
     def __init__(self, myID):
@@ -47,8 +57,15 @@ class SOLUTION:
 
     def Create_World(self):
         pyrosim.Start_SDF("generated/world.sdf")
-        pyrosim.Send_Cube(name=f'Box', pos=[
-            x + (2 * length), y + width, z], size=[length, width, height])
+        pyrosim.Send_Sphere(name=f'Ball', pos=[0, 1.5, 0.5])
+        pyrosim.Send_Cube(name='goalBack', pos=[goalPos[0], goalPos[1], goalPos[2]],
+                          size=[goalSize[0], goalSize[1], goalSize[2]], mass=999)
+        pyrosim.Send_Cube(name='crossbar', pos=crossPos,
+                          size=crossSize, mass=999)
+        pyrosim.Send_Cube(name='leftSidebar',
+                          pos=leftCrossPos, size=sideCrossSize, mass=999)
+        pyrosim.Send_Cube(name='rightSidebar', pos=rightCrossPos,
+                          size=sideCrossSize, mass=999)
         pyrosim.End()
 
     def Generate_Biped(self):
@@ -67,7 +84,7 @@ class SOLUTION:
             0.2, 0.2, 0.7])
         pyrosim.Send_Joint(name="LeftLower_LeftFoot", parent="LeftLower", child="LeftFoot",
                            type="revolute", position=[0, 0, -0.35], jointAxis="1 0 0")
-        pyrosim.Send_Cube(name=f'LeftFoot', pos=[-0.1, 0, -0.35], size=[
+        pyrosim.Send_Cube(name=f'LeftFoot', pos=[0, 0, -0.35], size=[
             0.5, 0.5, 0.1])
 
         pyrosim.Send_Joint(name="Torso_RightLeg", parent="Torso", child="RightLeg",

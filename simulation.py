@@ -21,12 +21,14 @@ class SIMULATION:
         p.setGravity(0, 0, -19.6)
         self.world = WORLD()
         self.robot = ROBOT(solutionID)
+        self.solutionID = solutionID
 
     def __del__(self):
         p.disconnect()
 
     def Get_Fitness(self):
-        self.robot.Get_Fitness()
+        self.world.Get_Ball_Fitness(self.solutionID)
+        # self.robot.Get_Fitness()
 
     def Run(self):
         for i in range(c.steps):
