@@ -9,6 +9,16 @@ import constants as c
 length, width, height = 1, 1, 1
 x, y, z = 0, 0, 1
 
+goalSize = (8, 0.5, 2)
+goalPos = (0, 12, 1)
+crossWidth = 1
+sideCrossSize = [crossWidth, crossWidth, goalSize[2]]
+crossSize = [goalSize[0]+2*crossWidth, crossWidth, crossWidth]
+leftCrossPos = [goalPos[0]-goalSize[0]/2, goalPos[1]-crossWidth, goalSize[2]/2]
+rightCrossPos = [goalPos[0]+goalSize[0]/2,
+                 goalPos[1]-crossWidth, goalSize[2]/2]
+crossPos = [goalPos[0], goalPos[1]-crossWidth, goalSize[2]+crossWidth/2]
+
 
 class SOLUTION:
     def __init__(self, myID):
@@ -21,8 +31,8 @@ class SOLUTION:
 
     def Start_Simulation(self, directOrGui):
         self.Create_World()
-        self.Generate_Quadruped()
-        self.Generate_Quad_Brain()
+        self.Generate_Biped()
+        self.Generate_Bi_Brain()
         os.system("start /B python simulate.py " +
                   directOrGui + " " + str(self.myID))
 
@@ -47,8 +57,72 @@ class SOLUTION:
 
     def Create_World(self):
         pyrosim.Start_SDF("generated/world.sdf")
-        pyrosim.Send_Cube(name=f'Box', pos=[
-            x + (2 * length), y + width, z], size=[length, width, height])
+        pyrosim.Send_Sphere(name=f'Ball', pos=[0, 1.5, 0.5])
+        pyrosim.Send_Cube(name='goalBack', pos=[goalPos[0], goalPos[1], goalPos[2]],
+                          size=[goalSize[0], goalSize[1], goalSize[2]], mass=999)
+        pyrosim.Send_Cube(name='crossbar', pos=crossPos,
+                          size=crossSize, mass=999)
+        pyrosim.Send_Cube(name='leftSidebar',
+                          pos=leftCrossPos, size=sideCrossSize, mass=999)
+        pyrosim.Send_Cube(name='rightSidebar', pos=rightCrossPos,
+                          size=sideCrossSize, mass=999)
+        pyrosim.End()
+
+    def Generate_Biped(self):
+        pyrosim.Start_URDF("generated/body.urdf")
+        pyrosim.Send_Cube(name=f'Torso', pos=[0, 0, 1.5], size=[
+            length, width, height])
+
+        pyrosim.Send_Joint(name="Torso_LeftLeg", parent="Torso", child="LeftLeg",
+                           type="revolute", position=[-0.6, 0, 1.5], jointAxis="1 0 0")
+        pyrosim.Send_Cube(name=f'LeftLeg', pos=[0, 0, 0], size=[
+            0.2, 0.2, 0.7])
+
+        pyrosim.Send_Joint(name="LeftLeg_LeftLower", parent="LeftLeg", child="LeftLower",
+                           type="revolute", position=[0, 0, -0.35], jointAxis="1 0 0")
+        pyrosim.Send_Cube(name=f'LeftLower', pos=[0, 0, -0.35], size=[
+            0.2, 0.2, 0.7])
+        pyrosim.Send_Joint(name="LeftLower_LeftFoot", parent="LeftLower", child="LeftFoot",
+                           type="revolute", position=[0, 0, -0.35], jointAxis="1 0 0")
+        pyrosim.Send_Cube(name=f'LeftFoot', pos=[0, 0, -0.35], size=[
+            0.5, 0.5, 0.1])
+
+        pyrosim.Send_Joint(name="Torso_RightLeg", parent="Torso", child="RightLeg",
+                           type="revolute", position=[0.6, 0, 1.5], jointAxis="1 0 0")
+        pyrosim.Send_Cube(name=f'RightLeg', pos=[0.0, 0, 0], size=[
+            0.2, 0.2, 0.7])
+
+        pyrosim.Send_Joint(name="RightLeg_RightLower", parent="RightLeg", child="RightLower",
+                           type="revolute", position=[0, 0, -0.35], jointAxis="1 0 0")
+        pyrosim.Send_Cube(name=f'RightLower', pos=[0.0, 0, -0.35], size=[
+            0.2, 0.2, 0.7])
+        pyrosim.Send_Joint(name="RightLower_RightFoot", parent="RightLower", child="RightFoot",
+                           type="revolute", position=[0, 0, -0.35], jointAxis="1 0 0")
+        pyrosim.Send_Cube(name=f'RightFoot', pos=[0.0, 0, -0.35], size=[
+            0.5, 0.5, 0.1])
+
+        pyrosim.End()
+
+    def Generate_Bi_Brain(self):
+        pyrosim.Start_NeuralNetwork(f"brain{self.myID}.nndf")
+
+        pyrosim.Send_Sensor_Neuron(name=0, linkName="Torso")
+        pyrosim.Send_Sensor_Neuron(name=1, linkName="LeftFoot")
+        pyrosim.Send_Sensor_Neuron(name=2, linkName="RightFoot")
+
+        pyrosim.Send_Motor_Neuron(name=3, jointName="Torso_LeftLeg")
+        pyrosim.Send_Motor_Neuron(name=4, jointName="Torso_RightLeg")
+        pyrosim.Send_Motor_Neuron(name=5, jointName="LeftLeg_LeftLower")
+        pyrosim.Send_Motor_Neuron(name=6, jointName="RightLeg_RightLower")
+
+        rows = c.numSensorNeurons
+        cols = c.numMotorNeurons
+        for currentRow in range(rows):
+            for currentColumn in range(cols):
+                index = currentRow*cols + currentColumn
+                pyrosim.Send_Synapse(sourceNeuronName=currentRow,
+                                     targetNeuronName=currentColumn+rows, weight=self.weights.item(index))
+
         pyrosim.End()
 
     def Generate_Quadruped(self):
