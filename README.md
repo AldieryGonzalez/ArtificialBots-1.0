@@ -2,7 +2,9 @@
 Repository to hold assignments for LudoBots in my Artificial Life Course at Northwestern University
 **To run code, use the command `python search.py` in terminal**
 You may need to use `python3` instead
+
 [Video Demonstration](https://youtu.be/UfuODCzTVGQ)
+
 [Example Graph](https://imgur.com/a/t7RA2Kk)
 
 
