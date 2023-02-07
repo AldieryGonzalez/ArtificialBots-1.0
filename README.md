@@ -5,7 +5,7 @@ You may need to use `python3` instead
 
 [Video Demonstration](https://youtu.be/UfuODCzTVGQ)
 
-[Example Graph](https://imgur.com/a/t7RA2Kk)
+[Example Graph](https://i.imgur.com/rBnmZal.png)
 
 
 ## Fitness Function
