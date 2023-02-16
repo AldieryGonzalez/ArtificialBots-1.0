@@ -1,1 +1,4 @@
 data/*
+*.npy
+graph8.npy
+graph9.npy
