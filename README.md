@@ -3,22 +3,17 @@ Repository to hold assignments for LudoBots in my Artificial Life Course at Nort
 **To run code, use the command `python search.py` in terminal**
 You may need to use `python3` instead
 
-[Video Demonstration](https://youtu.be/UfuODCzTVGQ)
-
-[Example Graph](https://i.imgur.com/rBnmZal.png)
+[Video Demonstration](https://youtu.be/FlXfaDhSz1Y)
 
 
 ## Fitness Function
-The main requirement is for the bot to use whatever means possible to make the ball into the goal
-Since the bot currently has no arms, no harm, no foul for not using their feet. As you will probably notice,
-the bot tends to favor headers when trained
-
-TLDR: Closer the ball gets to goal, the better.
+None for this one, this is to test knowledge of generating an artificial creature with the capability to move when sensing
+Sensing body parts are labeled by being green, while standard parts are a familiar cyan.
 
 ## How to play around
-The `constants.py` file has some features that can be played with such as the goalSize and goalPosition.
-There are also generations and populationSize that can be messed with to maximize the efficiency of the bot training
-though the default settings have hit a happy medium in my computer. 
+The `constants.py` file has some features that can be played with. Since the snake is procedurally generated, you can minmax the features of the snake.
+For now the snakes use a random 3d section of a cube with size that can be set in the constants. Functionality will be added later to support seeds and 
+recursive body part creation for 3D generations of creatures.
 
 If the code stops running due to permission errors, just rerun the code, this is an issue with OS not updating
 permissions on time in the middle of runtime, so not much can be done.
