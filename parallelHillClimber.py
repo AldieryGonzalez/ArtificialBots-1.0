@@ -10,7 +10,7 @@ class PARALLEL_HILL_CLIMBER:
     def __init__(self):
         os.system("del brain*.nndf")
         os.system("del fitness*.txt")
-        os.system("del graph*.nndf")
+        os.system("del graph*.npy")
         self.nextAvailableID = 0
         self.parents = {}
 
@@ -74,6 +74,8 @@ class PARALLEL_HILL_CLIMBER:
         self.analyze(mostFit)
 
     def analyze(self, fittest):
+        os.system("del graph*.npy")
+        return
         pyplot.plot(fittest.history, label="Fittest", linewidth=4, marker='o')
         for key in self.parents:
             fittestData = np.load(f"graph{key}.npy")

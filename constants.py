@@ -1,8 +1,16 @@
 import numpy
 
+# Snake Constants
+minSensors = 2  # MUST BE LESS THAN MIN_LINKS
+minLinks = 4  # MUST BE GREATER THAN MIN_SENSORS
+maxLinks = 8
+minSide = 0.3
+maxSide = 1
+
+# Fitness for playing football
 steps = 1200
-numberOfGenerations = 10
-populationSize = 10
+numberOfGenerations = 3
+populationSize = 3
 goalSize = (8, 0.5, 2)
 goalPos = (0, 12, 1)
 

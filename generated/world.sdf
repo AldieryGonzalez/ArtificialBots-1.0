@@ -1,6 +1,6 @@
 <sdf>
     <model name="Ball">
-        <pose>0 1.5 0.5 0 0 0 </pose>
+        <pose>15 1.5 0.5 0 0 0 </pose>
         <link name="Ball">
             <inertial>
                 <mass>1.0</mass>

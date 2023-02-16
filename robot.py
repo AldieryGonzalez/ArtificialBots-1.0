@@ -16,7 +16,7 @@ class ROBOT:
         self.Prepare_To_Sense()
         self.Prepare_To_Act()
         self.nn = NEURAL_NETWORK(f"brain{id}.nndf")
-        os.system(f"del brain{id}.nndf")
+        # os.system(f"del brain{id}.nndf")
 
     def Get_Fitness(self):
         stateOfLinkZero = p.getLinkState(self.robotId, 0)
