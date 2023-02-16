@@ -9,8 +9,8 @@ maxSide = 1
 
 # Fitness for playing football
 steps = 1200
-numberOfGenerations = 3
-populationSize = 3
+numberOfGenerations = 1
+populationSize = 1
 goalSize = (8, 0.5, 2)
 goalPos = (0, 12, 1)
 

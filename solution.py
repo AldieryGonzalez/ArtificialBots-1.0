@@ -34,7 +34,7 @@ class SOLUTION:
     def Start_Simulation(self, directOrGui):
         self.Create_World()
         self.Generate_Snake()
-        os.system("start /B python3 simulate.py " +
+        os.system("start /B python simulate.py " +
                   directOrGui + " " + str(self.myID))
 
     def Wait_For_Simulation_To_End(self):
