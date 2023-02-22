@@ -113,15 +113,15 @@ def Prepare_To_Simulate(bodyID):
     Prepare_Joint_Dictionary(bodyID)
 
 
-def Send_Cube(name="default", pos=[0, 0, 0], size=[1, 1, 1], mass=1.0, colorName="Cyan", rgbaStr="0 1.0 1.0 1.0"):
-    Send_Link(name, pos, size, "box", mass, colorName, rgbaStr)
+def Send_Cube(name="default", pos=[0, 0, 0], size=[1, 1, 1], mass=1.0, colorName="Cyan", rgbaStr="0 1.0 1.0 1.0", oriStr="0 0 0"):
+    Send_Link(name, pos, size, "box", mass, colorName, rgbaStr, oriStr)
 
 
-def Send_Sphere(name="default", pos=[0, 0, 0], size=[0.5], mass=1.0, colorName="Cyan", rgbaStr="0 1.0 1.0 1.0"):
-    Send_Link(name, pos, size, "sphere", mass, colorName, rgbaStr)
+def Send_Sphere(name="default", pos=[0, 0, 0], size=[0.5], mass=1.0, colorName="Cyan", rgbaStr="0 1.0 1.0 1.0", oriStr="0 0 0"):
+    Send_Link(name, pos, size, "sphere", mass, colorName, rgbaStr, oriStr)
 
 
-def Send_Link(name, pos, size, objectType, mass, colorName, rgbaStr):
+def Send_Link(name, pos, size, objectType, mass, colorName, rgbaStr, oriStr):
 
     global availableLinkIndex
 
@@ -135,7 +135,7 @@ def Send_Link(name, pos, size, objectType, mass, colorName, rgbaStr):
 
         links.append(link)
     else:
-        link = LINK_URDF(name, pos, size, colorName, rgbaStr)
+        link = LINK_URDF(name, pos, size, colorName, rgbaStr, oriStr)
 
         links.append(link)
 

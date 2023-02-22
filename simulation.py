@@ -19,7 +19,7 @@ class SIMULATION:
             p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
         self.directOrGUI = directOrGUI
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
-        p.setGravity(0, 0, -19.6)
+        p.setGravity(0, 0, -39.2)
         self.world = WORLD()
         self.robot = ROBOT(solutionID)
         self.solutionID = solutionID

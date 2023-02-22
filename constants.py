@@ -1,11 +1,22 @@
 import numpy
 
-# Snake Constants
-minSensors = 2  # MUST BE LESS THAN MIN_LINKS
-minLinks = 4  # MUST BE GREATER THAN MIN_SENSORS
-maxLinks = 8
 minSide = 0.3
 maxSide = 1
+
+# Snake Constants
+minSensors = 2  # MUST BE LESS THAN MIN_LINKS
+minLinks = 3  # MUST BE GREATER THAN MIN_SENSORS
+maxLinks = 4
+
+
+# Random Body Constants
+maxTorsoSize = 1
+minTorsoSize = 0.5
+maxTorsos = 4
+limbTreeLimit = 3
+torsoRatio = 0.8
+limbRatio = 0.3
+sensorChance = 0.2
 
 # Fitness for playing football
 steps = 1200
