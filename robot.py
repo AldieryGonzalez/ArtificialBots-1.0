@@ -16,8 +16,8 @@ class ROBOT:
         pyrosim.Prepare_To_Simulate(self.robotId)  # self.robotId
         self.Prepare_To_Sense()
         self.Prepare_To_Act()
-        self.nn = NEURAL_NETWORK(f"brain{id}.nndf")
-        os.system(f"del brain{id}.nndf")
+        self.nn = NEURAL_NETWORK(f"generated/brain{id}.nndf")
+        os.system(f"del generated/brain{id}.nndf")
 
     def Get_Fitness(self):
         stateOfLinkZero = p.getLinkState(self.robotId, 0)

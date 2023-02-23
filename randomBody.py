@@ -243,7 +243,7 @@ class RandomBody:
         pyrosim.End()
 
     def Generate_Brain(self):
-        pyrosim.Start_NeuralNetwork(f"brain{self.bodyID}.nndf")
+        pyrosim.Start_NeuralNetwork(f"generated/brain{self.bodyID}.nndf")
         nameIter = 0
         for sensorLink in self.sensors:
             pyrosim.Send_Sensor_Neuron(name=nameIter, linkName=sensorLink.id)

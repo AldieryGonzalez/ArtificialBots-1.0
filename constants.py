@@ -14,7 +14,7 @@ maxTorsoSize = 1
 minTorsoSize = 0.5
 maxTorsos = 3
 limbTreeLimit = 3
-torsoRatio = 0.8
+torsoRatio = 0.5
 limbRatio = 0.3
 sensorChance = 0.8
 

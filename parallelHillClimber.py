@@ -8,7 +8,7 @@ import os
 
 class PARALLEL_HILL_CLIMBER:
     def __init__(self):
-        os.system("del brain*.nndf")
+        os.system("del generated/brain*.nndf")
         os.system("del fitness*.txt")
         os.system("del graph*.npy")
         self.nextAvailableID = 0
