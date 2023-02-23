@@ -23,18 +23,16 @@ crossPos = [goalPos[0], goalPos[1]-crossWidth, goalSize[2]+crossWidth/2]
 
 class SOLUTION:
     def __init__(self, myID):
-        self.seedArray = self.Generate_Snake_Seed()
         self.myID = myID
+        self.body = self.Create_Body(RandomBody)
         self.history = []
-        self.weights = numpy.matrix([[numpy.random.rand() for i in range(
-            self.numMotors)] for j in range(self.numSensors)]) * 2 - 1
 
     def Evaluate(self, directOrGui):
         pass
 
     def Start_Simulation(self, directOrGui):
         self.Create_World()
-        self.Generate_Snake()
+        self.body.Generate()
         os.system("start /B python3 simulate.py " +
                   directOrGui + " " + str(self.myID))
 
@@ -51,13 +49,14 @@ class SOLUTION:
             self.history.append(self.fitness)
 
     def Mutate(self):
-        randRow = random.randint(0, self.numSensors-1)
-        randCol = random.randint(0, self.numMotors-1)
+        randRow = random.randrange(0, len(self.body.sensors))
+        randCol = random.randrange(0, len(self.body.joints))
         randValue = random.random() * 2 - 1
-        self.weights[randRow, randCol] = randValue
+        self.body.weights[randRow, randCol] = randValue
 
     def Set_ID(self, newID):
         self.myID = newID
+        self.body.Set_ID(newID)
 
     def Create_World(self):
         pyrosim.Start_SDF("generated/world.sdf")
@@ -76,88 +75,8 @@ class SOLUTION:
         pyrosim.Start_SDF("generated/world.sdf")
         pyrosim.End()
 
-    def Generate_Snake_Seed(self):
-        snakeLength = random.randint(c.minLinks, c.maxLinks)
-
-        def loadedBool(chance):
-            val = 1
-            if (random.random() > chance):
-                val = 0
-            return val
-        choiceArry = [loadedBool(0.2) for i in range(
-            snakeLength - c.minSensors)] + [1 for i in range(c.minSensors)]
-        random.shuffle(choiceArry)
-        self.numSensors = choiceArry.count(1)
-        self.numMotors = len(choiceArry)-1
-        return choiceArry
-
-    def Generate_Snake(self):
-
-        # Now to Generate the Body of the Snake
-        pyrosim.Start_URDF("generated/body.urdf")
-        for i, isSensor in enumerate(self.seedArray):
-            # Create the Random Size of the Link
-            linkWidth = (random.random() * (c.maxSide - c.minSide)) + c.minSide
-            linkHeight = (random.random() *
-                          (c.maxSide - c.minSide)) + c.minSide
-            linkLength = (random.random() *
-                          (c.maxSide - c.minSide)) + c.minSide
-            colorName = "Cyan"
-            rgbaStr = "0 1 1 1"
-            if (isSensor):
-                colorName = "Green"
-                rgbaStr = "0 1 0 1"
-
-            if (i == 0):
-                pyrosim.Send_Cube(name=f'link{i}', pos=[0, 0, 0.5], size=[
-                    linkLength, linkWidth, linkHeight], colorName=colorName, rgbaStr=rgbaStr)
-                pyrosim.Send_Joint(name=f"link{i}_link{i+1}", parent=f"link{i}", child=f"link{i+1}",
-                                   type="revolute", position=[linkLength/2, 0, 0.5], jointAxis="0 1 0")
-
-            elif (i + 1 < len(self.seedArray)):
-                # Make the Link
-                pyrosim.Send_Cube(name=f'link{i}', pos=[linkLength/2, 0, 0], size=[
-                    linkLength, linkWidth, linkHeight], rgbaStr=rgbaStr, colorName=colorName)
-                pyrosim.Send_Joint(name=f"link{i}_link{i+1}", parent=f"link{i}", child=f"link{i+1}",
-                                   type="revolute", position=[linkLength, 0, 0], jointAxis="0 1 0")
-            else:
-                # Make the Link
-                pyrosim.Send_Cube(name=f'link{i}', pos=[linkLength/2, 0, 0], size=[
-                    linkLength, linkWidth, linkHeight], colorName=colorName, rgbaStr=rgbaStr)
-        pyrosim.End()
-        self.Generate_Snake_Brain()
-
-    def Generate_Snake_Brain(self):
-        pyrosim.Start_NeuralNetwork(f"brain{self.myID}.nndf")
-        nameIter = 0
-        for i, isSensor in enumerate(self.seedArray):
-            if isSensor:
-                pyrosim.Send_Sensor_Neuron(name=nameIter, linkName=f"link{i}")
-                nameIter += 1
-        for i, isSensor in enumerate(self.seedArray):
-            if i + 1 < len(self.seedArray):
-                pyrosim.Send_Motor_Neuron(
-                    name=nameIter, jointName=f"link{i}_link{i+1}")
-                nameIter += 1
-
-        # pyrosim.Send_Sensor_Neuron(name=0, linkName="Torso")
-        # pyrosim.Send_Sensor_Neuron(name=1, linkName="LeftFoot")
-        # pyrosim.Send_Sensor_Neuron(name=2, linkName="RightFoot")
-
-        # pyrosim.Send_Motor_Neuron(name=3, jointName="Torso_LeftLeg")
-        # pyrosim.Send_Motor_Neuron(name=4, jointName="Torso_RightLeg")
-        # pyrosim.Send_Motor_Neuron(name=5, jointName="LeftLeg_LeftLower")
-        # pyrosim.Send_Motor_Neuron(name=6, jointName="RightLeg_RightLower")
-
-        rows = self.numSensors
-        cols = self.numMotors
-        for currentRow in range(rows):
-            for currentColumn in range(cols):
-                index = currentRow*cols + currentColumn
-                pyrosim.Send_Synapse(sourceNeuronName=currentRow,
-                                     targetNeuronName=currentColumn+rows, weight=self.weights.item(index))
-
-        pyrosim.End()
+    def Create_Body(self, bodyConstructor):
+        return bodyConstructor(self.myID)
 
     def Generate_Biped(self):
         pyrosim.Start_URDF("generated/body.urdf")
@@ -212,7 +131,7 @@ class SOLUTION:
             for currentColumn in range(cols):
                 index = currentRow*cols + currentColumn
                 pyrosim.Send_Synapse(sourceNeuronName=currentRow,
-                                     targetNeuronName=currentColumn+rows, weight=self.weights.item(index))
+                                     targetNeuronName=currentColumn+rows, weight=self.body.weights.item(index))
 
         pyrosim.End()
 
@@ -291,6 +210,6 @@ class SOLUTION:
             for currentColumn in range(cols):
                 index = currentRow*cols + currentColumn
                 pyrosim.Send_Synapse(sourceNeuronName=currentRow,
-                                     targetNeuronName=currentColumn+rows, weight=self.weights.item(index))
+                                     targetNeuronName=currentColumn+rows, weight=self.body.weights.item(index))
 
         pyrosim.End()

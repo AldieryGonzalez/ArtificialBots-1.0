@@ -12,11 +12,11 @@ maxLinks = 4
 # Random Body Constants
 maxTorsoSize = 1
 minTorsoSize = 0.5
-maxTorsos = 4
+maxTorsos = 3
 limbTreeLimit = 3
 torsoRatio = 0.8
 limbRatio = 0.3
-sensorChance = 0.2
+sensorChance = 0.8
 
 # Fitness for playing football
 steps = 1200
