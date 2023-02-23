@@ -6,7 +6,7 @@ You may need to use `python3` instead
 [Video Demonstration](https://youtu.be/F5WWDQPztYo)
 
 How it works
-![alt text](https://github.com/AldieryGonzalez/ArtificialBots-1.0/tree/Bodies/TorsoBotDiagram.pdf?raw=true)
+![alt text](https://github.com/AldieryGonzalez/ArtificialBots-1.0/blob/Bodies/TorsoBotDiagram.pdf?raw=true)
 
 
 ## Fitness Function
