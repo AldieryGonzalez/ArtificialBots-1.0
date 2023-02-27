@@ -94,13 +94,35 @@ class Box:
         )
 
 
-class Torso:
+class BodyPart:
+    def __init__(self, id, parent, parentPoint, ):
+        self.id = id
+
+    def Generate_Box(self, parent, parentPoint):
+        pass
+
+
+class Limb(BodyPart):
+    def __init__(self, id, parent: BodyPart, parentPoint: Vector):
+        self.id = f'limb{id}'
+        self.senses = random.random() < c.sensorChance
+        self.children: dict[int, tuple[Limb, Vector]]
+        self.Generate_Box(parent, parentPoint)
+
+    def createConnectedLimb(self, idNumber: int, restOfBody: list[Box]):
+        newPoint = Vector(*tuple(random.randint(-1, 1) for i in range(3)))
+        newLimb = Limb(idNumber, self, newPoint)
+        retries = 0
+
+    def Generate_Box(self, parent, parentPoint):
+        pass
+
+
+class Torso(BodyPart):
     def __init__(self, id=0, parent=None, parentPoint=None) -> None:
         self.id = f"torso{id}"
         self.senses = random.random() < c.sensorChance
-        self.limbs = []  # each limb tree of less cube like objects
-        # ID: (Torso, Point) | (Limb, Point)
-        self.children: dict[int, tuple[Torso, Vector]] = {}
+        self.children: dict[int, tuple[Torso or Limb, Vector]] = {}
         self.Generate_Dimensions(parent, parentPoint)
 
     def createConnectedTorso(self, idNumber: int, restOfBody):
@@ -126,7 +148,7 @@ class Torso:
                 return True
         return False
 
-    def Generate_Dimensions(self, p, pp):
+    def Generate_Dimensions(self, parentLimb, parentPoint):
         width = random.uniform(c.minTorsoSize, c.maxTorsoSize)
         depth = random.uniform(c.minTorsoSize, c.maxTorsoSize)
         height = random.uniform(c.minTorsoSize, c.maxTorsoSize)
@@ -142,9 +164,9 @@ class Torso:
         dim = Vector(width, depth, height)
 
         pos = Vector(0, 0, 0)
-        if (p != None and pp != None):
-            parent: Torso = p
-            pointVector: Vector = pp
+        if (parentLimb != None and parentPoint != None):
+            parent: Torso = parentLimb
+            pointVector: Vector = parentPoint
             parentConnectionPoint = (
                 (parent.box.dimensions/2) * pointVector) + parent.box.center
             newCenter = ((dim/2) * pointVector) + parentConnectionPoint

@@ -13,9 +13,14 @@ maxLinks = 4
 maxTorsoSize = 1
 minTorsoSize = 0.5
 maxTorsos = 3
+
+minLimbSize = 0.1
+maxLimbSize = 1
 limbTreeLimit = 3
+
 torsoRatio = 0.5
 limbRatio = 0.3
+
 sensorChance = 0.8
 
 # Fitness for playing football
