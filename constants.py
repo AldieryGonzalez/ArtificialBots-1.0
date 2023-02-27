@@ -20,7 +20,7 @@ sensorChance = 0.8
 
 # Fitness for playing football
 steps = 1200
-numberOfGenerations = 1
+numberOfGenerations = 4
 populationSize = 1
 goalSize = (8, 0.5, 2)
 goalPos = (0, 12, 1)
