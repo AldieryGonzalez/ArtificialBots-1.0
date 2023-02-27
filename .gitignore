@@ -1,0 +1,6 @@
+data/*
+generated/*
+*.py[cod]
+*.urdf
+*.nndf
+*.txt
