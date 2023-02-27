@@ -12,7 +12,8 @@ class ROBOT:
     def __init__(self, id):
         self.id = id
         print("\n\n", id)
-        self.robotId = p.loadURDF(f"generated/body{id}.urdf")
+        self.robotId = p.loadURDF(f"generated/body{id}.urdf",
+                                  )
         pyrosim.Prepare_To_Simulate(self.robotId)  # self.robotId
         self.Prepare_To_Sense()
         self.Prepare_To_Act()
