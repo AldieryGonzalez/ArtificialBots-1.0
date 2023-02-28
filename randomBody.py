@@ -65,6 +65,12 @@ class Vector:
         else:
             return self
 
+    def __eq__(self, other) -> bool:
+        if (isinstance(other, Vector)):
+            return self.toString() == other.toString()
+        else:
+            return False
+
 
 def randomBetweenRounded(min, max, decimalPlaces):
     randomNum = random.uniform(c.minTorsoSize, c.maxTorsoSize)
@@ -140,6 +146,7 @@ class Torso():
         else:
             self.senses = random.random() < c.sensorChance
         self.children: dict[int, tuple[Torso or Limb, Vector]] = {}
+        self.usedPoints: list[Vector] = []
         self.Generate_Dimensions(parent, parentPoint)
 
     def createConnectedTorso(self, idNumber: int, restOfBody):
@@ -147,16 +154,23 @@ class Torso():
         newTorso = Torso(idNumber, self, newPoint)
         retries = 3
 
-        while newTorso.clipsWithBody(restOfBody):
-            print(f'COLLIDED {self.id} makining a box for {newTorso.id}')
+        while ((newPoint in self.usedPoints) or newTorso.clipsWithBody(restOfBody)):
+            print(
+                f'COLLIDED {self.id} makining a box for {f"torso{idNumber}"}')
+            print(
+                f"point: {newPoint.toString()}, usedPoints: {list(map((lambda v: v.toString()), self.usedPoints))}")
             if retries < 1:
                 print("RETURNING FALSE")
                 return False
             newPoint = createValidVector()
             newTorso = Torso(idNumber, self, newPoint)
+            print(
+                f"point: {newPoint.toString()}, usedPoints: {list(map((lambda v: v.toString()), self.usedPoints))}")
             retries = retries - 1
 
         self.children[idNumber] = (newTorso, newPoint)
+        self.usedPoints.append(newPoint)
+        newTorso.usedPoints.append(newPoint * -1)
         return newTorso
 
     def clipsWithBody(self, restOfBody: list[Box]):
@@ -208,7 +222,7 @@ class RandomBody:
         self.Generate_Brain()
 
     def Define_Body(self):
-        numberOfTorsos = random.randint(4, c.maxTorsos)
+        numberOfTorsos = random.randint(2, c.maxTorsos)
         torsos = [self.root]
         nextAvailableID = 1
         body = [self.root]
@@ -228,6 +242,9 @@ class RandomBody:
             body.append(newTorso)
             joints.append((parentTorso, newTorso))
 
+        # for torso in torsos:
+        #     pass
+
         lowestPoint = 0
         for box in self.collisionBoxes:
             lowestPoint = min(lowestPoint, box.minPoint.z)
@@ -243,28 +260,29 @@ class RandomBody:
     def Generate_Body(self):
         pyrosim.Start_URDF(f"generated/body{self.bodyID}.urdf")
         curTorso = self.root
-        # colorName, rgbaStr = "Cyan", "0 1 1 1"
-        # if (curTorso.senses):
-        #     colorName, rgbaStr = "Green", "0 1 0 1"
+        colorName, rgbaStr = "Cyan", "0 1 1 1"
+        if (curTorso.senses):
+            colorName, rgbaStr = "Green", "0 1 0 1"
 
         ###
         # Now Generating the Body
         ###
-        ID_to_color = {"torso0": ("Black", "0 0 0 1"),
-                       "torso1": ("Blue", "0 0 1 1"),
-                       "torso2": ("Green", "0 1 0 1"),
-                       "torso3": ("Cyan", "0 1 1 1")}
-        colorName, rgbaStr = ID_to_color[curTorso.id]
+        # for debugging
+        # ID_to_color = {"torso0": ("Black", "0 0 0 1"),
+        #                "torso1": ("Blue", "0 0 1 1"),
+        #                "torso2": ("Green", "0 1 0 1"),
+        #                "torso3": ("Cyan", "0 1 1 1")}
+        # colorName, rgbaStr = ID_to_color[curTorso.id]
         pyrosim.Send_Cube(name=curTorso.id, pos=[*curTorso.box.center], size=[
             *curTorso.box.dimensions], colorName=colorName, rgbaStr=rgbaStr)
 
         def genNode(newLink: Torso, vector: Vector):
-            # colorName, rgbaStr = "Cyan", "0 1 1 1"
-            # if (newLink.senses):
-            #     colorName, rgbaStr = "Green", "0 1 0 1"
+            colorName, rgbaStr = "Cyan", "0 1 1 1"
+            if (newLink.senses):
+                colorName, rgbaStr = "Green", "0 1 0 1"
             newCenter = (newLink.box.dimensions / 2) * vector
 
-            colorName, rgbaStr = ID_to_color[newLink.id]
+            # colorName, rgbaStr = ID_to_color[newLink.id]
 
             pyrosim.Send_Cube(name=newLink.id,
                               pos=[*newCenter], size=[*newLink.box.dimensions], colorName=colorName, rgbaStr=rgbaStr)

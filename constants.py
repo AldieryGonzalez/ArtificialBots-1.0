@@ -19,7 +19,7 @@ maxLimbSize = 1
 limbTreeLimit = 3
 
 torsoRatio = 0.5
-limbRatio = 0.3
+limbRatio = 0.1
 
 sensorChance = 0.5
 
