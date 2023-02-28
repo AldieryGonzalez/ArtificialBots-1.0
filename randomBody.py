@@ -11,8 +11,10 @@ class Vector:
         self.y = y
         self.z = z
 
-    def toString(self):
-        return f"{self.x} {self.y} {self.z}"
+    def toString(self, invert=False):
+        if invert:
+            return f"{abs(abs(self.x) - 1)} {abs(abs(self.y) - 1)} {abs(abs(self.z) - 1)}"
+        return f"{abs(self.x)} {abs(self.y)} {abs(self.z)}"
 
     def __iter__(self):
         return iter((self.x, self.y, self.z))
@@ -73,7 +75,7 @@ class Vector:
 
 
 def randomBetweenRounded(min, max, decimalPlaces):
-    randomNum = random.uniform(c.minTorsoSize, c.maxTorsoSize)
+    randomNum = random.uniform(min, max)
     return round(randomNum, decimalPlaces)
 
 
@@ -102,6 +104,11 @@ class Box:
         self.maxPoint = Vector(self.center.x + self.width/2,
                                self.center.y + self.depth/2, self.center.z + self.height/2)
 
+    def get_ratio(self):
+        biggest = max(self.width, self.depth, self.height)
+        smallest = min(self.width, self.depth, self.height)
+        return smallest/biggest
+
     def collides(self, other):
         b: Box = other
         return (
@@ -122,30 +129,60 @@ class BodyPart:
         pass
 
 
-class Limb(BodyPart):
-    def __init__(self, id, parent: BodyPart, parentPoint: Vector):
+class Limb():
+    def __init__(self, id, parent, parentPoint: Vector):
         self.id = f'limb{id}'
-        self.senses = random.random() < c.sensorChance
-        self.children: dict[int, tuple[Limb, Vector]]
+        self.senses = True
+        self.children: dict[int, tuple[Limb, Vector]] = {}
         self.Generate_Box(parent, parentPoint)
 
-    def createConnectedLimb(self, idNumber: int, restOfBody: list[Box]):
-        newPoint = Vector(*tuple(random.randint(-1, 1) for i in range(3)))
-        newLimb = Limb(idNumber, self, newPoint)
-        retries = 0
+    # def createConnectedLimb(self, idNumber: int, restOfBody: list[Box]):
+    #     newPoint = Vector(*tuple(random.randint(-1, 1) for i in range(3)))
+    #     # newLimb = Limb(idNumber, newPoint)
+    #     retries = 0
 
-    def Generate_Box(self, parent, parentPoint):
-        pass
+    def clipsWithBody(self, restOfBody: list[Box]):
+        for box in restOfBody:
+            if box.collides(self.box):
+                return True
+        return False
+
+    def Generate_Box(self, parentLimb, parentPoint):
+        width = randomBetweenRounded(c.minLimbSize, c.maxLimbSize, 4)
+        depth = randomBetweenRounded(c.minLimbSize, c.maxLimbSize, 4)
+        height = randomBetweenRounded(c.minLimbSize, c.maxLimbSize, 4)
+        biggest = max(width, depth, height)
+        smallest = min(width, depth, height)
+        while (smallest/biggest > c.limbRatio):
+            width = randomBetweenRounded(c.minLimbSize, c.maxLimbSize, 4)
+            depth = randomBetweenRounded(c.minLimbSize, c.maxLimbSize, 4)
+            height = randomBetweenRounded(c.minLimbSize, c.maxLimbSize, 4)
+            biggest = max(width, depth, height)
+            smallest = min(width, depth, height)
+
+        dim = Vector(width, depth, height)
+
+        pos = Vector(0, 0, 0)
+        if (parentLimb != None and parentPoint != None):
+            parent: Torso = parentLimb
+            pointVector: Vector = parentPoint
+            parentConnectionPoint = (
+                (parent.box.dimensions/2) * pointVector) + parent.box.center
+            newCenter = ((dim/2) * pointVector) + parentConnectionPoint
+
+            pos = newCenter
+        self.box = Box(pos, dim)
 
 
 class Torso():
     def __init__(self, id=0, parent=None, parentPoint=None) -> None:
         self.id = f"torso{id}"
-        if (id == 2):
+        if (id == 0):
             self.senses = False
         else:
-            self.senses = random.random() < c.sensorChance
-        self.children: dict[int, tuple[Torso or Limb, Vector]] = {}
+            # self.senses = random.random() < c.sensorChance
+            self.senses = False
+        self.children: dict[int, tuple[Torso | Limb, Vector]] = {}
         self.usedPoints: list[Vector] = []
         self.Generate_Dimensions(parent, parentPoint)
 
@@ -155,23 +192,31 @@ class Torso():
         retries = 3
 
         while ((newPoint in self.usedPoints) or newTorso.clipsWithBody(restOfBody)):
-            print(
-                f'COLLIDED {self.id} makining a box for {f"torso{idNumber}"}')
-            print(
-                f"point: {newPoint.toString()}, usedPoints: {list(map((lambda v: v.toString()), self.usedPoints))}")
             if retries < 1:
-                print("RETURNING FALSE")
                 return False
             newPoint = createValidVector()
             newTorso = Torso(idNumber, self, newPoint)
-            print(
-                f"point: {newPoint.toString()}, usedPoints: {list(map((lambda v: v.toString()), self.usedPoints))}")
             retries = retries - 1
 
         self.children[idNumber] = (newTorso, newPoint)
         self.usedPoints.append(newPoint)
         newTorso.usedPoints.append(newPoint * -1)
         return newTorso
+
+    def createConnectedLimb(self, idNumber, restOfBody):
+        newPoint = createValidVector()
+        newLimb = Limb(idNumber, self, newPoint)
+        retries = 4
+        while ((newPoint in self.usedPoints) or newLimb.clipsWithBody(restOfBody)):
+            if retries < 1:
+                return False
+            newPoint = createValidVector()
+            newLimb = Limb(idNumber, self, newPoint)
+            retries = retries - 1
+
+        self.children[idNumber] = (newLimb, newPoint)
+        self.usedPoints.append(newPoint)
+        return newLimb
 
     def clipsWithBody(self, restOfBody: list[Box]):
         for box in restOfBody:
@@ -212,6 +257,7 @@ class RandomBody:
         self.collisionBoxes: list[Box] = [self.root.box]
         self.Define_Body()
         self.bodyID = bodyID
+        random.seed(bodyID + 1)
 
     def Set_ID(self, newID):
         self.bodyID = newID
@@ -225,13 +271,12 @@ class RandomBody:
         numberOfTorsos = random.randint(2, c.maxTorsos)
         torsos = [self.root]
         nextAvailableID = 1
-        body = [self.root]
-        sensors: list[Torso] = []
-        joints: list[tuple[Torso, Torso]] = []
+        body: list[Torso | Limb] = [self.root]
+        sensors: list[Torso | Limb] = []
+        joints: list[tuple[Torso | Limb, Torso | Limb]] = []
 
         while nextAvailableID < numberOfTorsos:
             parentTorso = random.choice(torsos)
-            print(list(map((lambda t: t.id), torsos)))
             newTorso = parentTorso.createConnectedTorso(
                 nextAvailableID, self.collisionBoxes)
             if newTorso == False:
@@ -242,8 +287,19 @@ class RandomBody:
             body.append(newTorso)
             joints.append((parentTorso, newTorso))
 
-        # for torso in torsos:
-        #     pass
+        numOfLimbsWant = random.randint(1, 3)
+        numOfLimbs = 0
+        while numOfLimbs < numOfLimbsWant:
+            parentTorso = random.choice(torsos)
+            newLimb = parentTorso.createConnectedLimb(
+                nextAvailableID, self.collisionBoxes)
+            if newLimb == False:
+                continue
+            nextAvailableID = nextAvailableID + 1
+            numOfLimbs = numOfLimbs + 1
+            self.collisionBoxes.append(newLimb.box)
+            body.append(newLimb)
+            joints.append((parentTorso, newLimb))
 
         lowestPoint = 0
         for box in self.collisionBoxes:
@@ -276,7 +332,7 @@ class RandomBody:
         pyrosim.Send_Cube(name=curTorso.id, pos=[*curTorso.box.center], size=[
             *curTorso.box.dimensions], colorName=colorName, rgbaStr=rgbaStr)
 
-        def genNode(newLink: Torso, vector: Vector):
+        def genNode(newLink: Torso | Limb, vector: Vector):
             colorName, rgbaStr = "Cyan", "0 1 1 1"
             if (newLink.senses):
                 colorName, rgbaStr = "Green", "0 1 0 1"
@@ -287,14 +343,17 @@ class RandomBody:
             pyrosim.Send_Cube(name=newLink.id,
                               pos=[*newCenter], size=[*newLink.box.dimensions], colorName=colorName, rgbaStr=rgbaStr)
             for linkID in newLink.children:
-                childLink: Torso = newLink.children[linkID][0]
+                childLink: Torso | Limb = newLink.children[linkID][0]
                 childPoint = newLink.children[linkID][1]
                 jointPos = ((newLink.box.dimensions / 2)
                             * childPoint) + newCenter
                 jointAxis = childPoint.toString()
+                jointType = "revolute"
+                if (childLink.id.startswith("limb")):
+                    jointType = "spherical"
 
                 pyrosim.Send_Joint(name=f"{newLink.id}_{childLink.id}", parent=newLink.id, child=childLink.id,
-                                   type="revolute", position=[*jointPos], jointAxis=jointAxis)
+                                   type=jointType, position=[*jointPos], jointAxis=jointAxis)
                 genNode(childLink, childPoint)
 
         for linkID in curTorso.children:
@@ -303,9 +362,12 @@ class RandomBody:
             jointPos = ((curTorso.box.dimensions / 2)
                         * point) + curTorso.box.center
             jointAxis = point.toString()
+            jointType = "revolute"
+            if (childLink.id.startswith("limb")):
+                jointType = "spherical"
 
             pyrosim.Send_Joint(name=f"{curTorso.id}_{childLink.id}", parent=curTorso.id, child=childLink.id,
-                               type="revolute", position=[*jointPos], jointAxis=jointAxis)
+                               type=jointType, position=[*jointPos], jointAxis=jointAxis)
             genNode(childLink, point)
         pyrosim.End()
 
