@@ -15,6 +15,10 @@ Example Bot
 
 ![alt text](https://github.com/AldieryGonzalez/ArtificialBots-1.0/blob/Bodies-2.0/Bot5.PNG?raw=true)
 
+EVOLVED
+![image](https://user-images.githubusercontent.com/31702218/222057290-82e3705b-bb20-4003-b126-4cba7701d9f2.png)
+
+
 ## Fitness Function
 Distance from starting Point as fast as possible
 Sensing body parts are labeled by being green, while standard parts are a familiar cyan.
