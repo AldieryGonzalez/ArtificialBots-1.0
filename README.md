@@ -6,10 +6,10 @@ You may need to use `python3` instead
 [Video Demonstration](https://youtu.be/F5WWDQPztYo)
 
 How it works
-![alt text](https://github.com/AldieryGonzalez/ArtificialBots-1.0/blob/Bodies-2.0/bodies2.png?raw=true)
+![alt text](https://github.com/AldieryGonzalez/ArtificialBots-1.0/blob/Bodies-2.0/Bodies2.PNG?raw=true)
 
 Example Bot
-![alt text](https://github.com/AldieryGonzalez/ArtificialBots-1.0/blob/Bodies-2.0/bot5.png?raw=true)
+![alt text](https://github.com/AldieryGonzalez/ArtificialBots-1.0/blob/Bodies-2.0/Bot5.PNG?raw=true)
 
 ## Fitness Function
 None for this one, this is to test knowledge of generating an artificial creature with the capability to move when sensing
