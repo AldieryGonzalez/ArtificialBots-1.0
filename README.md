@@ -4,6 +4,7 @@ Repository to hold assignments for LudoBots in my Artificial Life Course at Nort
 You may need to use `python3` instead
 
 [Video Demonstration](https://youtu.be/F5WWDQPztYo)
+Example diagram for evolution shown in video as well
 
 How it works
 
