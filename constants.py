@@ -8,14 +8,15 @@ minSensors = 2  # MUST BE LESS THAN MIN_LINKS
 minLinks = 3  # MUST BE GREATER THAN MIN_SENSORS
 maxLinks = 4
 
+pickleEveryXGens = 50
 
 # Random Body Constants
 maxTorsoSize = 1
 minTorsoSize = 0.5
-maxTorsos = 4
+maxTorsos = 3
 
 minLimbSize = 0.1
-maxLimbSize = 1.2
+maxLimbSize = 1.9
 limbTreeLimit = 3
 
 torsoRatio = 0.5
@@ -25,8 +26,8 @@ sensorChance = 0.5
 
 # Fitness for playing football
 steps = 2000
-numberOfGenerations = 1
-populationSize = 1
+numberOfGenerations = 10
+populationSize = 10
 goalSize = (8, 0.5, 2)
 goalPos = (0, 12, 1)
 
@@ -35,4 +36,4 @@ fl_amplitude, fl_frequency, fl_phaseOffset = numpy.pi/4, 10, 0
 bl_amplitude, bl_frequency, bl_phaseOffset = numpy.pi/4, 10, numpy.pi/8
 numSensorNeurons = 3
 numMotorNeurons = 4
-motorJointRange = 1.8
+motorJointRange = 1.2

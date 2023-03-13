@@ -28,8 +28,8 @@ class SIMULATION:
         p.disconnect()
 
     def Get_Fitness(self):
-        self.world.Get_Ball_Fitness(self.solutionID)
-        # self.robot.Get_Fitness()
+        # self.world.Get_Ball_Fitness(self.solutionID)
+        self.robot.Get_Fitness()
 
     def Run(self):
         for i in range(c.steps):

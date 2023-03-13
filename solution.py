@@ -30,33 +30,50 @@ class SOLUTION:
     def Evaluate(self, directOrGui):
         pass
 
-    def Start_Simulation(self, directOrGui):
+    def Start_Simulation(self, directOrGui, eval=True):
         self.Create_World()
         self.body.Generate()
         os.system("start /B python simulate.py " +
-                  directOrGui + " " + str(self.myID))
+                  directOrGui + " " + str(self.myID) + " " + str(eval))
 
     def Wait_For_Simulation_To_End(self):
         while not os.path.exists(f"fitness{str(self.myID)}.txt"):
             time.sleep(0.01)
-        f = open(f"fitness{str(self.myID)}.txt", "r")
-        value = float(f.read())
-        self.fitness = value
-        # print(f"\n\nRobot Number {self.myID}: {self.fitness}\n")
-        f.close()
-        os.system(f"del fitness{self.myID}.txt")
-        if (len(self.history) == 0):
-            self.history.append(self.fitness)
+        try:
+            f = open(f"fitness{str(self.myID)}.txt", "r")
+            value = float(f.read())
+            self.fitness = value
+            # print(f"\n\nRobot Number {self.myID}: {self.fitness}\n")
+            f.close()
+            os.system(f"del fitness{self.myID}.txt")
+            if (len(self.history) == 0):
+                self.history.append(self.fitness)
+        except:
+            time.sleep(0.1)
+            print("error")
+            f = open(f"fitness{str(self.myID)}.txt", "r")
+            value = float(f.read())
+            self.fitness = value
+            # print(f"\n\nRobot Number {self.myID}: {self.fitness}\n")
+            f.close()
+            os.system(f"del fitness{self.myID}.txt")
+            if (len(self.history) == 0):
+                self.history.append(self.fitness)
 
     def Mutate(self):
+        self.body.Mutate()
         randRow = random.randrange(0, len(self.body.sensors))
         randCol = random.randrange(0, len(self.body.joints))
         randValue = random.random() * 2 - 1
         self.body.weights[randRow, randCol] = randValue
+        self.body.Generate()
 
     def Set_ID(self, newID):
         self.myID = newID
         self.body.Set_ID(newID)
+
+    def Print(self):
+        print(f'ID#: {self.myID}, fitness: {self.fitness}')
 
     def Create_World(self):
         pyrosim.Start_SDF("generated/world.sdf")

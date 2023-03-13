@@ -162,7 +162,7 @@ class Limb():
     def __init__(self, id, parent, parentPoint: Vector):
         self.id = f'limb{id}'
         self.senses = True
-        self.children: dict[int, tuple[Limb, Vector, Vector]] = {}
+        self.children: dict[int, tuple[Limb, Vector]] = {}
         self.Generate_Box(parent, parentPoint)
 
     # def createConnectedLimb(self, idNumber: int, restOfBody: list[Box]):
@@ -177,6 +177,7 @@ class Limb():
         return False
 
     def Generate_Box(self, parentLimb, parentPoint):
+        print("Generating Box")
         width = randomBetweenRounded(c.minLimbSize, c.maxLimbSize, 4)
         depth = randomBetweenRounded(c.minLimbSize, c.maxLimbSize, 4)
         height = randomBetweenRounded(c.minLimbSize, c.maxLimbSize, 4)
@@ -211,7 +212,7 @@ class Torso():
         else:
             # self.senses = random.random() < c.sensorChance
             self.senses = False
-        self.children: dict[int, tuple[Torso | Limb, Vector, Vector]] = {}
+        self.children: dict[int, tuple[Torso | Limb, Vector]] = {}
         self.usedPoints: list[Vector] = []
         self.Generate_Dimensions(parent, parentPoint)
 
@@ -221,14 +222,13 @@ class Torso():
         retries = 3
 
         while ((newPoint in self.usedPoints) or newTorso.clipsWithBody(restOfBody)):
-
             if retries < 1:
                 return False
             newPoint = createValidVector()
             newTorso = Torso(idNumber, self, newPoint)
             retries = retries - 1
 
-        self.children[idNumber] = (newTorso, newPoint, newPoint)
+        self.children[idNumber] = (newTorso, newPoint)
         self.usedPoints.append(newPoint)
         newTorso.usedPoints.append(newPoint * -1)
         return newTorso
@@ -244,7 +244,7 @@ class Torso():
             newLimb = Limb(idNumber, self, newPoint)
             retries = retries - 1
 
-        self.children[idNumber] = (newLimb, newPoint, createValidVector())
+        self.children[idNumber] = (newLimb, newPoint)
         self.usedPoints.append(newPoint)
         return newLimb
 
@@ -292,7 +292,6 @@ class RandomBody:
         self.bodyID = newID
 
     def Mutate(self):
-        grow = random.choice([True, False])
         randomLink = random.choice(self.body)
         while (isinstance(randomLink, Torso)):
             randomLink = random.choice(self.body)
@@ -305,6 +304,9 @@ class RandomBody:
     def Define_Body(self):
         random.seed(self.bodyID + 1)
         numberOfTorsos = random.randint(2, c.maxTorsos)
+        numOfLimbsWant = random.randint(1, 3)
+        numOfLimbs = 0
+        retries = 10
         torsos = [self.root]
         nextAvailableID = 1
         body: list[Torso | Limb] = [self.root]
@@ -316,7 +318,6 @@ class RandomBody:
             newTorso = parentTorso.createConnectedTorso(
                 nextAvailableID, self.collisionBoxes)
             if newTorso == False:
-                numberOfTorsos = numberOfTorsos - 1
                 continue
             nextAvailableID = nextAvailableID + 1
             self.collisionBoxes.append(newTorso.box)
@@ -324,9 +325,6 @@ class RandomBody:
             body.append(newTorso)
             joints.append((parentTorso, newTorso))
 
-        numOfLimbsWant = random.randint(1, 3)
-        numOfLimbs = 0
-        retries = 100
         while numOfLimbs < numOfLimbsWant:
             parentTorso = random.choice(torsos)
             newLimb = parentTorso.createConnectedLimb(
@@ -334,7 +332,7 @@ class RandomBody:
             if newLimb == False:
                 retries = retries - 1
                 if retries < 1:
-                    retries = 100
+                    retries = 10
                     numOfLimbsWant = numOfLimbsWant - 1
                 continue
             nextAvailableID = nextAvailableID + 1
@@ -389,11 +387,13 @@ class RandomBody:
             for linkID in newLink.children:
                 childLink: Torso | Limb = newLink.children[linkID][0]
                 childPoint = newLink.children[linkID][1]
-                axis = newLink.children[linkID][2]
                 jointPos = ((newLink.box.dimensions / 2)
                             * childPoint) + newCenter
-                jointAxis = axis.toString()
+                jointAxis = childPoint.toString()
                 jointType = "revolute"
+                if (childLink.id.startswith("limb")):
+                    jointType = "revolute"
+                    jointAxis = createValidVector().toString()
 
                 pyrosim.Send_Joint(name=f"{newLink.id}_{childLink.id}", parent=newLink.id, child=childLink.id,
                                    type=jointType, position=[*jointPos], jointAxis=jointAxis)
@@ -402,11 +402,13 @@ class RandomBody:
         for linkID in curTorso.children:
             childLink = curTorso.children[linkID][0]
             point = curTorso.children[linkID][1]
-            axis = curTorso.children[linkID][2]
             jointPos = ((curTorso.box.dimensions / 2)
                         * point) + curTorso.box.center
-            jointAxis = axis.toString()
+            jointAxis = point.toString()
             jointType = "revolute"
+            if (childLink.id.startswith("limb")):
+                jointType = "revolute"
+                jointAxis = createValidVector().toString()
 
             pyrosim.Send_Joint(name=f"{curTorso.id}_{childLink.id}", parent=curTorso.id, child=childLink.id,
                                type=jointType, position=[*jointPos], jointAxis=jointAxis)
@@ -414,7 +416,7 @@ class RandomBody:
         pyrosim.End()
 
     def Generate_Brain(self):
-        pyrosim.Start_NeuralNetwork(f"brain{self.bodyID}.nndf")
+        pyrosim.Start_NeuralNetwork(f"generated/brain{self.bodyID}.nndf")
         nameIter = 0
         for sensorLink in self.sensors:
             pyrosim.Send_Sensor_Neuron(name=nameIter, linkName=sensorLink.id)
@@ -429,6 +431,8 @@ class RandomBody:
         for currentRow in range(rows):
             for currentColumn in range(cols):
                 index = currentRow*cols + currentColumn
+                pass
                 pyrosim.Send_Synapse(sourceNeuronName=currentRow,
                                      targetNeuronName=currentColumn+rows, weight=self.weights.item(index))
+
         pyrosim.End()
