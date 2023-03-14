@@ -43,10 +43,13 @@ The `constants.py` file has some features that can be played with. Since the sna
 For now the snakes use a random 3d section of a cube with size that can be set in the constants. Functionality will be added later to support seeds and 
 recursive body part creation for 3D generations of creatures.
 
+
 If the code stops running due to permission errors, just rerun the code, this is an issue with OS not updating
 permissions on time in the middle of runtime, so not much can be done.
 
+
 ## No Time? No Problem!!
+
 
 
 ## Required Pip Installs
@@ -60,4 +63,3 @@ permissions on time in the middle of runtime, so not much can be done.
  2. [Pyrosim Repo (Github)](https://github.com/jbongard/pyrosim)
     
 
-    
