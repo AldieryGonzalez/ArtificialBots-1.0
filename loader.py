@@ -1,6 +1,8 @@
 import sys
 import os
 import pickle
+import numpy as np
+import matplotlib.pyplot as pyplot
 
 genFileName = sys.argv[1]
 generationFile = open(genFileName, "rb")
@@ -25,6 +27,17 @@ if len(sys.argv) > 2:
         mostFit.Start_Simulation("GUI", False)
         print(f"\nColumn: {bestKey}")
         mostFit.Print()
+    elif (snd == "graph"):
+        mostFit = generation[0]
+        for key in generation:
+            pyplot.plot(generation[key].history, marker='o')
+            if (mostFit.fitness < generation[key].fitness):
+                mostFit = generation[key]
+        pyplot.plot(mostFit.history, label="Fittest", linewidth=4, marker='o')
+        pyplot.legend()
+        pyplot.xlabel("Generation")
+        pyplot.ylabel("Distance from goal (fitness)")
+        pyplot.show()
     else:
         generation[int(snd)].Start_Simulation("GUI", False)
         print(f"\nColumn: {int(snd)}")
