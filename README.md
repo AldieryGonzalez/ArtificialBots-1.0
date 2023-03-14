@@ -1,7 +1,21 @@
-# ArtificialBots-1.0
+# ArtificialBots-1.0- [ArtificialBots-1.0](#artificialbots-10)
+- [ArtificialBots-1.0- ArtificialBots-1.0](#artificialbots-10--artificialbots-10)
+  - [Running the Code](#running-the-code)
+  - [Fitness Function](#fitness-function)
+  - [How to play around](#how-to-play-around)
+  - [No Time? No Problem!!](#no-time-no-problem)
+  - [Required Pip Installs](#required-pip-installs)
+  - [Credits and other repositories](#credits-and-other-repositories)
+
 Repository to hold assignments for LudoBots in my Artificial Life Course at Northwestern University
+
+## Running the Code
+Start by modifying the parameters of the evolutionary algorithm that you would like to set in the `constants.py` file in the main directory
+
+
 **To run code, use the command `python search.py` in terminal**
 You may need to use `python3` instead
+
 
 [Video Demonstration](https://youtu.be/F5WWDQPztYo)
 Example diagram for evolution shown in video as well
@@ -31,6 +45,9 @@ recursive body part creation for 3D generations of creatures.
 
 If the code stops running due to permission errors, just rerun the code, this is an issue with OS not updating
 permissions on time in the middle of runtime, so not much can be done.
+
+## No Time? No Problem!!
+
 
 ## Required Pip Installs
 

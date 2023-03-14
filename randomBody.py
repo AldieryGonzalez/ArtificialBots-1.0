@@ -20,15 +20,15 @@ class Vector:
         choice = random.randint(1, 3)
         if choice == 1:
             temp = self.x + random.uniform(-0.5, 0.5)
-            if temp > c.minLimbSize:
+            if temp > c.minLimbSize and temp < c.maxLimbSize:
                 self.x = temp
         elif choice == 2:
             temp = self.y + random.uniform(-0.5, 0.5)
-            if temp > c.minLimbSize:
+            if temp > c.minLimbSize and temp < c.maxLimbSize:
                 self.y = temp
         else:
             temp = self.z + random.uniform(-0.5, 0.5)
-            if temp > c.minLimbSize:
+            if temp > c.minLimbSize and temp < c.maxLimbSize:
                 self.z = temp
 
     def __iter__(self):
@@ -159,16 +159,38 @@ class BodyPart:
 
 
 class Limb():
-    def __init__(self, id, parent, parentPoint: Vector):
+    def __init__(self, id, parent, parentPoint: Vector, depth):
         self.id = f'limb{id}'
+        self.limbDepth = depth
         self.senses = True
-        self.children: dict[int, tuple[Limb, Vector, Vector]] = {}
+        self.children: dict[str, tuple[Limb, Vector, Vector]] = {}
+        self.usedPoints: list[Vector] = []
         self.Generate_Box(parent, parentPoint)
+        self.parent = parent
 
     # def createConnectedLimb(self, idNumber: int, restOfBody: list[Box]):
     #     newPoint = Vector(*tuple(random.randint(-1, 1) for i in range(3)))
     #     # newLimb = Limb(idNumber, newPoint)
     #     retries = 0
+
+    def createConnectedLimb(self, idNumber, restOfBody):
+        if self.limbDepth >= c.limbTreeLimit:
+            return False
+        newPoint = createValidVector()
+        newLimb = Limb(idNumber, self, newPoint, self.limbDepth + 1)
+        retries = 4
+        while ((newPoint in self.usedPoints) or newLimb.clipsWithBody(restOfBody)):
+            if retries < 1:
+                return False
+            newPoint = createValidVector()
+            newLimb = Limb(idNumber, self, newPoint, self.limbDepth + 1)
+            retries = retries - 1
+
+        self.children[f"limb{idNumber}"] = (
+            newLimb, newPoint, createValidVector())
+        self.usedPoints.append(newPoint)
+        newLimb.usedPoints.append(newPoint * -1)
+        return newLimb
 
     def clipsWithBody(self, restOfBody: list[Box]):
         for box in restOfBody:
@@ -206,14 +228,11 @@ class Limb():
 class Torso():
     def __init__(self, id=0, parent=None, parentPoint=None) -> None:
         self.id = f"torso{id}"
-        if (id == 0):
-            self.senses = False
-        else:
-            # self.senses = random.random() < c.sensorChance
-            self.senses = False
-        self.children: dict[int, tuple[Torso | Limb, Vector, Vector]] = {}
+        self.senses = False
+        self.children: dict[str, tuple[Torso | Limb, Vector, Vector]] = {}
         self.usedPoints: list[Vector] = []
         self.Generate_Dimensions(parent, parentPoint)
+        self.parent = parent
 
     def createConnectedTorso(self, idNumber: int, restOfBody):
         newPoint = createValidVector()
@@ -228,24 +247,26 @@ class Torso():
             newTorso = Torso(idNumber, self, newPoint)
             retries = retries - 1
 
-        self.children[idNumber] = (newTorso, newPoint, newPoint)
+        self.children[f"torso{idNumber}"] = (newTorso, newPoint, newPoint)
         self.usedPoints.append(newPoint)
         newTorso.usedPoints.append(newPoint * -1)
         return newTorso
 
     def createConnectedLimb(self, idNumber, restOfBody):
         newPoint = createValidVector()
-        newLimb = Limb(idNumber, self, newPoint)
+        newLimb = Limb(idNumber, self, newPoint, 1)
         retries = 4
         while ((newPoint in self.usedPoints) or newLimb.clipsWithBody(restOfBody)):
             if retries < 1:
                 return False
             newPoint = createValidVector()
-            newLimb = Limb(idNumber, self, newPoint)
+            newLimb = Limb(idNumber, self, newPoint, 1)
             retries = retries - 1
 
-        self.children[idNumber] = (newLimb, newPoint, createValidVector())
+        self.children[f"limb{idNumber}"] = (
+            newLimb, newPoint, createValidVector())
         self.usedPoints.append(newPoint)
+        newLimb.usedPoints.append(newPoint * -1)
         return newLimb
 
     def clipsWithBody(self, restOfBody: list[Box]):
@@ -281,29 +302,159 @@ class Torso():
         self.box = Box(pos, dim)
 
 
+def doWithXChance(func, chance):
+    if random.random() < chance:
+        func()
+
+
 class RandomBody:
     def __init__(self, bodyID):
+        self.bodyID = bodyID
+        random.seed(c.seed + bodyID)
         self.root = Torso()
         self.collisionBoxes: list[Box] = [self.root.box]
-        self.bodyID = bodyID
         self.Define_Body()
 
     def Set_ID(self, newID):
         self.bodyID = newID
 
     def Mutate(self):
-        grow = random.choice([True, False])
+        doWithXChance(self.Mutate_Body_Part_Size, 0.1)
+        doWithXChance(self.Add_Remove_Body_Part, 0.1)
+        doWithXChance(self.Mutate_Brain_Structure, 0.8)
+        # self.Mutate_Joints()
+
+    def Mutate_Body_Part_Size(self):
         randomLink = random.choice(self.body)
-        while (isinstance(randomLink, Torso)):
-            randomLink = random.choice(self.body)
         randomLink.box.dimensions.Mutate()
 
+    def Add_Remove_Body_Part(self):
+        randomLink = random.choice(self.body[1:])
+        add = random.choice([True, False])
+
+        if add:
+            retries = 3
+            while retries > 0:
+                if isinstance(randomLink, Torso):
+                    if random.choice([True, False]):
+                        newLink = randomLink.createConnectedTorso(
+                            self.nextID, self.collisionBoxes)
+                        if newLink:
+                            self.nextID = self.nextID + 1
+                            self.collisionBoxes.append(newLink.box)
+                            self.body.append(newLink)
+                            self.Add_Weights(joint=True, sensor=False)
+                            self.joints.append((randomLink, newLink))
+                            self.Adjust_Height()
+                            return newLink
+                        else:
+                            retries = retries - 1
+                            continue
+                newLink = randomLink.createConnectedLimb(
+                    self.nextID, self.collisionBoxes)
+                if newLink:
+                    self.nextID = self.nextID + 1
+                    self.collisionBoxes.append(newLink.box)
+                    self.body.append(newLink)
+                    self.Add_Weights(joint=True, sensor=newLink.senses)
+                    self.joints.append((randomLink, newLink))
+                    self.sensors.append(newLink)
+                    self.Adjust_Height()
+                    return newLink
+                else:
+                    retries = retries - 1
+                    continue
+        else:
+            if (randomLink.parent != None) and self.Remove_Link(randomLink):
+                del randomLink.parent.children[randomLink.id]
+            # self.Adjust_Sensors()
+
+    def Add_Weights(self, joint, sensor):
+        numJoints = len(self.joints)
+        if (joint):
+            arr = numpy.insert(self.weights, numJoints,
+                               [numpy.random.rand() for i in range(len(self.sensors))], 1)
+            self.weights = arr
+            numJoints += 1
+        if (sensor):
+            arr = numpy.insert(self.weights, len(self.sensors),
+                               [numpy.random.rand() for i in range(numJoints)], 0)
+            self.weights = arr
+
+    def Remove_Weights(self, jInd, sInd):
+        if (jInd != -1):
+            arr = numpy.delete(self.weights, jInd, 1)
+            self.weights = arr
+        if (sInd != -1):
+            arr = numpy.delete(self.weights, sInd, 0)
+            self.weights = arr
+
+    def Remove_Link(self, link: Torso | Limb):
+        if (link.parent != None) and (link.parent.parent != None):
+            for child in link.children.values():
+                self.Remove_Link(child[0])
+            if (len(self.sensors) < 2 or len(self.joints) < 2):
+                return False
+            self.collisionBoxes.remove(link.box)
+            self.body.remove(link)
+            ji = -1
+            si = -1
+            try:
+                ji = self.joints.index((link.parent, link))
+            except:
+                pass
+            try:
+                si = self.sensors.index(link)
+            except:
+                pass
+            self.Remove_Weights(ji, si)
+            self.joints.remove((link.parent, link))
+            try:
+                self.sensors.remove(link)
+            except:
+                pass
+            return True
+        return False
+
+    def Adjust_Sensors(self):
+        if (len(self.sensors) < 1):
+            part = random.choice(self.body)
+            part.senses = True
+            self.sensors.append(part)
+
+    def Mutate_Joints(self):
+        pass
+
+    def Mutate_Brain_Structure(self):
+        randomLink = random.choice(self.body[1:])
+        if (randomLink.senses):
+            if (len(self.sensors) > 2):
+                randomLink.senses = False
+                self.Remove_Weights(
+                    jInd=-1, sInd=self.sensors.index(randomLink))
+                self.sensors.remove(randomLink)
+        else:
+            randomLink.senses = True
+            self.Add_Weights(joint=False, sensor=True)
+            self.sensors.append(randomLink)
+
     def Generate(self):
+        sensors = list(map(lambda s: s.id, self.sensors))
+        joints = list(map(lambda j: (j[0].id, j[1].id), self.joints))
         self.Generate_Body()
         self.Generate_Brain()
 
+    def Redefine_Body(self):
+        pass
+
+    def Adjust_Height(self):
+        lowestPoint = 0
+        for box in self.collisionBoxes:
+            lowestPoint = min(lowestPoint, box.minPoint.z)
+        for link in self.body:
+            link.box.set_z(link.box.center.z - lowestPoint)
+
     def Define_Body(self):
-        random.seed(self.bodyID + 1)
         numberOfTorsos = random.randint(2, c.maxTorsos)
         torsos = [self.root]
         nextAvailableID = 1
@@ -312,8 +463,8 @@ class RandomBody:
         joints: list[tuple[Torso | Limb, Torso | Limb]] = []
 
         while nextAvailableID < numberOfTorsos:
-            parentTorso = random.choice(torsos)
-            newTorso = parentTorso.createConnectedTorso(
+            parentPart = random.choice(torsos)
+            newTorso = parentPart.createConnectedTorso(
                 nextAvailableID, self.collisionBoxes)
             if newTorso == False:
                 numberOfTorsos = numberOfTorsos - 1
@@ -322,14 +473,14 @@ class RandomBody:
             self.collisionBoxes.append(newTorso.box)
             torsos.append(newTorso)
             body.append(newTorso)
-            joints.append((parentTorso, newTorso))
+            joints.append((parentPart, newTorso))
 
-        numOfLimbsWant = random.randint(1, 3)
+        numOfLimbsWant = random.randint(1, c.baseLimbMax)
         numOfLimbs = 0
         retries = 100
         while numOfLimbs < numOfLimbsWant:
-            parentTorso = random.choice(torsos)
-            newLimb = parentTorso.createConnectedLimb(
+            parentPart = random.choice(body)
+            newLimb = parentPart.createConnectedLimb(
                 nextAvailableID, self.collisionBoxes)
             if newLimb == False:
                 retries = retries - 1
@@ -341,7 +492,7 @@ class RandomBody:
             numOfLimbs = numOfLimbs + 1
             self.collisionBoxes.append(newLimb.box)
             body.append(newLimb)
-            joints.append((parentTorso, newLimb))
+            joints.append((parentPart, newLimb))
 
         lowestPoint = 0
         for box in self.collisionBoxes:
@@ -354,7 +505,7 @@ class RandomBody:
         self.sensors = sensors
         self.joints = joints
         self.body = body
-        self.weights = numpy.matrix([[numpy.random.rand() for i in range(
+        self.weights = numpy.array([[numpy.random.rand() for i in range(
             len(self.joints))] for j in range(len(self.sensors))]) * 2 - 1
 
     def Generate_Body(self):

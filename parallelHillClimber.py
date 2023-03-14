@@ -20,15 +20,19 @@ class PARALLEL_HILL_CLIMBER:
             self.parents[i] = SOLUTION(self.nextAvailableID)
             self.nextAvailableID += 1
 
+    def Save_Generation(self, genname):
+        generation = open(genname, 'wb')
+        pickle.dump(self.parents, generation)
+        generation.close()
+
     def Evolve(self):
         self.Evaluate(self.parents)
-        for currentGeneration in range(c.numberOfGenerations - 1):
+        self.Save_Generation("generation0")
+        for currentGeneration in range(1, c.numberOfGenerations):
             if (currentGeneration % c.pickleEveryXGens == 0):
-                generation = open(
-                    f'generation{currentGeneration}', 'wb')
-                pickle.dump(self.parents, generation)
-                generation.close()
+                self.Save_Generation(f'generation{currentGeneration}')
             self.Evolve_For_One_Generation()
+        self.Save_Generation(f'generation{c.numberOfGenerations-1}')
 
     def Evolve_For_One_Generation(self):
         self.Spawn()

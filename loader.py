@@ -13,15 +13,22 @@ if len(sys.argv) > 2:
     snd = sys.argv[2]
     if (snd == "print"):
         for bodyKey in generation:
+            print(f"\nColumn: {bodyKey}")
             generation[bodyKey].Print()
     elif (snd == "best"):
         mostFit = generation[0]
+        bestKey = 0
         for key in generation:
             if (mostFit.fitness < generation[key].fitness):
                 mostFit = generation[key]
+                bestKey = key
         mostFit.Start_Simulation("GUI", False)
+        print(f"\nColumn: {bestKey}")
+        mostFit.Print()
     else:
-        generation[snd].Start_Simulation("GUI", False)
+        generation[int(snd)].Start_Simulation("GUI", False)
+        print(f"\nColumn: {int(snd)}")
+        generation[int(snd)].Print()
 else:
     for bodyKey in generation:
         generation[bodyKey].Start_Simulation("GUI", False)

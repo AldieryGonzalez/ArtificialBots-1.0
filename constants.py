@@ -18,15 +18,17 @@ maxTorsos = 3
 minLimbSize = 0.1
 maxLimbSize = 1.9
 limbTreeLimit = 3
+baseLimbMax = 3
 
 torsoRatio = 0.5
 limbRatio = 0.3
 
 sensorChance = 0.5
+seed = 100
 
 # Fitness for playing football
-steps = 2000
-numberOfGenerations = 10
+steps = 1000
+numberOfGenerations = 500
 populationSize = 10
 goalSize = (8, 0.5, 2)
 goalPos = (0, 12, 1)

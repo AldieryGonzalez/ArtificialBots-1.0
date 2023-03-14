@@ -1,4 +1,5 @@
 import numpy
+from termcolor import cprint
 import pyrosim.pyrosim as pyrosim
 from randomBody import RandomBody
 import os
@@ -73,7 +74,8 @@ class SOLUTION:
         self.body.Set_ID(newID)
 
     def Print(self):
-        print(f'ID#: {self.myID}, fitness: {self.fitness}')
+        cprint(
+            f'ID#: {self.myID}, fitness: {self.fitness}', "black", "on_white", attrs=["bold"])
 
     def Create_World(self):
         pyrosim.Start_SDF("generated/world.sdf")
