@@ -11,7 +11,7 @@ import constants as c
 class ROBOT:
     def __init__(self, id):
         self.id = id
-        self.robotId = p.loadURDF("generated/body.urdf")
+        self.robotId = p.loadURDF(f"generated/body{id}.urdf")
         pyrosim.Prepare_To_Simulate(self.robotId)  # self.robotId
         self.Prepare_To_Sense()
         self.Prepare_To_Act()
@@ -21,9 +21,12 @@ class ROBOT:
     def Get_Fitness(self):
         stateOfLinkZero = p.getLinkState(self.robotId, 0)
         positionOfLinkZero = stateOfLinkZero[0]
-        xCoordinateOfLinkZero = positionOfLinkZero[2]
+        p1 = numpy.array(positionOfLinkZero)
+        p2 = numpy.array((0, 0, p1[2]))
+        xCoordinateOfLinkZero = positionOfLinkZero[0]
+        distanceFromZero = numpy.linalg.norm(p1-p2)
         f = open(f"tmp{self.id}.txt", "w")
-        f.write(str(xCoordinateOfLinkZero))
+        f.write(str(distanceFromZero))
         f.close()
         os.rename(f"tmp{self.id}.txt",
                   f"fitness{self.id}.txt")

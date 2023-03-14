@@ -1,5 +1,7 @@
 import numpy
+from termcolor import cprint
 import pyrosim.pyrosim as pyrosim
+from randomBody import RandomBody
 import os
 import random
 import time
@@ -23,44 +25,61 @@ crossPos = [goalPos[0], goalPos[1]-crossWidth, goalSize[2]+crossWidth/2]
 class SOLUTION:
     def __init__(self, myID):
         self.myID = myID
+        self.body = self.Create_Body(RandomBody)
         self.history = []
-        self.weights = numpy.matrix([[numpy.random.rand() for i in range(
-            c.numMotorNeurons)] for j in range(c.numSensorNeurons)]) * 2 - 1
 
     def Evaluate(self, directOrGui):
         pass
 
-    def Start_Simulation(self, directOrGui):
+    def Start_Simulation(self, directOrGui, eval=True):
         self.Create_World()
-        self.Generate_Biped()
-        self.Generate_Bi_Brain()
+        self.body.Generate()
         os.system("start /B python simulate.py " +
-                  directOrGui + " " + str(self.myID))
+                  directOrGui + " " + str(self.myID) + " " + str(eval))
 
     def Wait_For_Simulation_To_End(self):
         while not os.path.exists(f"fitness{str(self.myID)}.txt"):
             time.sleep(0.01)
-        f = open(f"fitness{str(self.myID)}.txt", "r")
-        value = float(f.read())
-        self.fitness = value
-        # print(f"\n\nRobot Number {self.myID}: {self.fitness}\n")
-        f.close()
-        os.system(f"del fitness{self.myID}.txt")
-        if (len(self.history) == 0):
-            self.history.append(self.fitness)
+        try:
+            f = open(f"fitness{str(self.myID)}.txt", "r")
+            value = float(f.read())
+            self.fitness = value
+            # print(f"\n\nRobot Number {self.myID}: {self.fitness}\n")
+            f.close()
+            os.system(f"del fitness{self.myID}.txt")
+            if (len(self.history) == 0):
+                self.history.append(self.fitness)
+        except:
+            time.sleep(0.1)
+            print("error")
+            f = open(f"fitness{str(self.myID)}.txt", "r")
+            value = float(f.read())
+            self.fitness = value
+            # print(f"\n\nRobot Number {self.myID}: {self.fitness}\n")
+            f.close()
+            os.system(f"del fitness{self.myID}.txt")
+            if (len(self.history) == 0):
+                self.history.append(self.fitness)
 
     def Mutate(self):
-        randRow = random.randint(0, c.numSensorNeurons-1)
-        randCol = random.randint(0, c.numMotorNeurons-1)
+        self.body.Mutate()
+        randRow = random.randrange(0, len(self.body.sensors))
+        randCol = random.randrange(0, len(self.body.joints))
         randValue = random.random() * 2 - 1
-        self.weights[randRow, randCol] = randValue
+        self.body.weights[randRow, randCol] = randValue
+        self.body.Generate()
 
     def Set_ID(self, newID):
         self.myID = newID
+        self.body.Set_ID(newID)
+
+    def Print(self):
+        cprint(
+            f'ID#: {self.myID}, fitness: {self.fitness}', "black", "on_white", attrs=["bold"])
 
     def Create_World(self):
         pyrosim.Start_SDF("generated/world.sdf")
-        pyrosim.Send_Sphere(name=f'Ball', pos=[0, 1.5, 0.5])
+        pyrosim.Send_Sphere(name=f'Ball', pos=[15, 1.5, 0.5])
         pyrosim.Send_Cube(name='goalBack', pos=[goalPos[0], goalPos[1], goalPos[2]],
                           size=[goalSize[0], goalSize[1], goalSize[2]], mass=999)
         pyrosim.Send_Cube(name='crossbar', pos=crossPos,
@@ -71,10 +90,17 @@ class SOLUTION:
                           size=sideCrossSize, mass=999)
         pyrosim.End()
 
+    def Create_Empty_World(self):
+        pyrosim.Start_SDF("generated/world.sdf")
+        pyrosim.End()
+
+    def Create_Body(self, bodyConstructor):
+        return bodyConstructor(self.myID)
+
     def Generate_Biped(self):
         pyrosim.Start_URDF("generated/body.urdf")
         pyrosim.Send_Cube(name=f'Torso', pos=[0, 0, 1.5], size=[
-            length, width, height])
+            length, width, height], colorName="Red", rgbaStr="1 0 0 1")
 
         pyrosim.Send_Joint(name="Torso_LeftLeg", parent="Torso", child="LeftLeg",
                            type="revolute", position=[-0.6, 0, 1.5], jointAxis="1 0 0")
@@ -124,7 +150,7 @@ class SOLUTION:
             for currentColumn in range(cols):
                 index = currentRow*cols + currentColumn
                 pyrosim.Send_Synapse(sourceNeuronName=currentRow,
-                                     targetNeuronName=currentColumn+rows, weight=self.weights.item(index))
+                                     targetNeuronName=currentColumn+rows, weight=self.body.weights.item(index))
 
         pyrosim.End()
 
@@ -203,6 +229,6 @@ class SOLUTION:
             for currentColumn in range(cols):
                 index = currentRow*cols + currentColumn
                 pyrosim.Send_Synapse(sourceNeuronName=currentRow,
-                                     targetNeuronName=currentColumn+rows, weight=self.weights.item(index))
+                                     targetNeuronName=currentColumn+rows, weight=self.body.weights.item(index))
 
         pyrosim.End()
