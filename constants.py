@@ -3,17 +3,12 @@ import numpy
 minSide = 0.3
 maxSide = 1
 
-# Snake Constants
-minSensors = 2  # MUST BE LESS THAN MIN_LINKS
-minLinks = 3  # MUST BE GREATER THAN MIN_SENSORS
-maxLinks = 4
-
 pickleEveryXGens = 50
 
 # Random Body Constants
 maxTorsoSize = 1
 minTorsoSize = 0.5
-maxTorsos = 3
+maxTorsos = 3  # Max amount of Torsos ON GENERATION
 
 minLimbSize = 0.1
 maxLimbSize = 1.9
@@ -23,6 +18,7 @@ baseLimbMax = 3
 torsoRatio = 0.5
 limbRatio = 0.3
 
+motorJointRange = 1.2
 sensorChance = 0.5
 seed = 100
 
@@ -38,4 +34,3 @@ fl_amplitude, fl_frequency, fl_phaseOffset = numpy.pi/4, 10, 0
 bl_amplitude, bl_frequency, bl_phaseOffset = numpy.pi/4, 10, numpy.pi/8
 numSensorNeurons = 3
 numMotorNeurons = 4
-motorJointRange = 1.2
