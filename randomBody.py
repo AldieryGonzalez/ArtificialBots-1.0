@@ -229,12 +229,12 @@ class Torso():
     def __init__(self, id=0, parent=None, parentPoint=None) -> None:
         self.id = f"torso{id}"
         self.senses = False
-        self.children: dict[str, tuple[Torso | Limb, Vector, Vector]] = {}
-        self.usedPoints: list[Vector] = []
+        self.children = {}
+        self.usedPoints = []
         self.Generate_Dimensions(parent, parentPoint)
         self.parent = parent
 
-    def createConnectedTorso(self, idNumber: int, restOfBody):
+    def createConnectedTorso(self, idNumber, restOfBody):
         newPoint = createValidVector()
         newTorso = Torso(idNumber, self, newPoint)
         retries = 3
@@ -389,7 +389,7 @@ class RandomBody:
             arr = numpy.delete(self.weights, sInd, 0)
             self.weights = arr
 
-    def Remove_Link(self, link: Torso | Limb):
+    def Remove_Link(self, link):
         if (link.parent != None) and (link.parent.parent != None):
             for child in link.children.values():
                 self.Remove_Link(child[0])
@@ -456,11 +456,13 @@ class RandomBody:
 
     def Define_Body(self):
         numberOfTorsos = random.randint(2, c.maxTorsos)
-        torsos = [self.root]
+        torsos = []
+        torsos.append(self.root)
         nextAvailableID = 1
-        body: list[Torso | Limb] = [self.root]
-        sensors: list[Torso | Limb] = []
-        joints: list[tuple[Torso | Limb, Torso | Limb]] = []
+        body = []
+        body.append(self.root)
+        sensors = []
+        joints = []
 
         while nextAvailableID < numberOfTorsos:
             parentPart = random.choice(torsos)
@@ -527,7 +529,7 @@ class RandomBody:
         pyrosim.Send_Cube(name=curTorso.id, pos=[*curTorso.box.center], size=[
             *curTorso.box.dimensions], colorName=colorName, rgbaStr=rgbaStr)
 
-        def genNode(newLink: Torso | Limb, vector: Vector):
+        def genNode(newLink, vector: Vector):
             colorName, rgbaStr = "Cyan", "0 1 1 1"
             if (newLink.senses):
                 colorName, rgbaStr = "Green", "0 1 0 1"
@@ -538,7 +540,7 @@ class RandomBody:
             pyrosim.Send_Cube(name=newLink.id,
                               pos=[*newCenter], size=[*newLink.box.dimensions], colorName=colorName, rgbaStr=rgbaStr)
             for linkID in newLink.children:
-                childLink: Torso | Limb = newLink.children[linkID][0]
+                childLink = newLink.children[linkID][0]
                 childPoint = newLink.children[linkID][1]
                 axis = newLink.children[linkID][2]
                 jointPos = ((newLink.box.dimensions / 2)

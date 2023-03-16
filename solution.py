@@ -34,7 +34,7 @@ class SOLUTION:
     def Start_Simulation(self, directOrGui, eval=True):
         self.Create_World()
         self.body.Generate()
-        os.system("start /B python simulate.py " +
+        os.system("start /B python3 simulate.py " +
                   directOrGui + " " + str(self.myID) + " " + str(eval))
 
     def Wait_For_Simulation_To_End(self):
